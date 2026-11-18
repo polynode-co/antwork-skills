@@ -1,6 +1,6 @@
 ---
 name: antwork
-description: Router for the Antwork social-media toolkit. Use when the user wants a multi-step Antwork workflow through its MCP connector — posting about what they shipped from a git repo, a content calendar, repurposing one piece across platforms, a campaign or launch week, data-driven post ideas, studying viral posts in a niche or from a creator, reading an account's voice, an analytics report, or a full social-presence audit. Routes "/antwork <command>" to the right skill. Trigger on "/antwork", "use Antwork to…", or any request to plan, analyze or audit social posting through Antwork.
+description: Router for the Antwork social-media toolkit. Use when the user wants a multi-step Antwork workflow through its MCP connector — posting about what they shipped from a git repo, cutting one long video into captioned vertical Shorts, a content calendar, repurposing one piece across platforms, a campaign or launch week, data-driven post ideas, studying viral posts in a niche or from a creator, reading an account's voice, an analytics report, or a full social-presence audit. Routes "/antwork <command>" to the right skill. Trigger on "/antwork", "use Antwork to…", or any request to plan, analyze or audit social posting through Antwork.
 ---
 
 # Antwork — social-media command center
@@ -15,6 +15,7 @@ These skills cover the **multi-step workflows** the server can't spell out on it
 |---|---|---|
 | `/antwork calendar <theme>` | `antwork-calendar` | Plan and batch-schedule a content calendar across the week/month. |
 | `/antwork repurpose <source>` | `antwork-repurpose` | Turn one piece (blog, transcript, long post) into platform-native variants. |
+| `/antwork clip <video>` | `antwork-clip` | Cut one long video into captioned vertical clips on the user's machine, then draft each for YouTube Shorts, TikTok, Instagram Reels and Facebook. |
 | `/antwork campaign <goal>` | `antwork-campaign` | Sequence a multi-post campaign / launch week toward a goal. |
 | `/antwork ideas [topic]` | `antwork-ideas` | Generate data-driven hooks grounded in what already performed. |
 | `/antwork viral <niche or @creator>` | `antwork-viral` | Study posts that went viral in a niche or for a creator, name the patterns, and write variations in the user's voice. |

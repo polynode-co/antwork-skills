@@ -80,7 +80,7 @@ Each platform's own rules apply: Instagram and Pinterest need an image or video,
 
 ## Antwork Skills for Claude Code and claude.ai
 
-This repo also adds [Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) on top of the connector. The connector alone handles single steps: drafting, scheduling, publishing, media, connections. The skills cover the multi-step workflows: a content calendar planned around what's already scheduled, one piece repurposed across platforms, a campaign arc, ideas grounded in what performed, variations on what went viral in your niche, an analytics report, and a scored audit. One router sends `/antwork <command>` (or a plain request) to the right one.
+This repo also adds [Agent Skills](https://docs.claude.com/en/docs/agents-and-tools/agent-skills) on top of the connector. The connector alone handles single steps: drafting, scheduling, publishing, media, connections. The skills cover the multi-step workflows: a content calendar planned around what's already scheduled, one piece repurposed across platforms, one long video cut into captioned Shorts, a campaign arc, ideas grounded in what performed, variations on what went viral in your niche, an analytics report, and a scored audit. One router sends `/antwork <command>` (or a plain request) to the right one.
 
 ### Commands
 
@@ -89,6 +89,7 @@ This repo also adds [Agent Skills](https://docs.claude.com/en/docs/agents-and-to
 | `/antwork voice [account]` | [`antwork-voice`](skills/antwork-voice/SKILL.md) | Read an account's voice from its real posts, or capture one from samples. |
 | `/antwork calendar <theme>` | [`antwork-calendar`](skills/antwork-calendar/SKILL.md) | Plan and batch-schedule a content calendar. |
 | `/antwork repurpose <source>` | [`antwork-repurpose`](skills/antwork-repurpose/SKILL.md) | One piece → one post with a native version per platform. |
+| `/antwork clip <video>` | [`antwork-clip`](skills/antwork-clip/SKILL.md) | One long video → captioned vertical clips, cut locally with ffmpeg, each drafted for YouTube Shorts, TikTok, Instagram Reels and Facebook. |
 | `/antwork campaign <goal>` | [`antwork-campaign`](skills/antwork-campaign/SKILL.md) | Sequence a multi-post campaign / launch week. |
 | `/antwork ideas [topic]` | [`antwork-ideas`](skills/antwork-ideas/SKILL.md) | Data-driven hooks grounded in what already performed. |
 | `/antwork viral <niche or @creator>` | [`antwork-viral`](skills/antwork-viral/SKILL.md) | Study what went viral in a niche or for a creator, name the patterns, write variations in your voice. |
@@ -127,7 +128,7 @@ This repo is also a Claude Code **plugin marketplace**. Installing the plugin wi
 /plugin install antwork@antwork
 ```
 
-That's it — the [`antwork` MCP server](.mcp.json) connects automatically (complete the OAuth prompt), and the router, 9 skills, and 5 audit agents load. Why the plugin over loose skills: the skills are useless until Antwork's MCP is connected, and the plugin ships that config bundled, so there's no separate connector setup.
+That's it — the [`antwork` MCP server](.mcp.json) connects automatically (complete the OAuth prompt), and the router, 10 skills, and 5 audit agents load. Why the plugin over loose skills: the skills are useless until Antwork's MCP is connected, and the plugin ships that config bundled, so there's no separate connector setup.
 
 #### Script install (no plugin)
 
@@ -171,13 +172,13 @@ antwork-skills/
 ├── .mcp.json                 # Antwork MCP server — bundled & auto-connected
 ├── .cursor-plugin/           # Cursor plugin manifest + single-plugin marketplace
 ├── mcp.json                  # the same server, for the Cursor plugin
-├── skills/                   # router + 9 specialized skills, each with its own templates/
+├── skills/                   # router + 10 specialized skills, each with its own templates/
 │   ├── antwork/              # router — /antwork <command>
 │   ├── antwork-ship/         # commits / PRs / releases → posts
 │   ├── antwork-calendar/     ├── antwork-campaign/
 │   ├── antwork-repurpose/    ├── antwork-ideas/
 │   ├── antwork-voice/        ├── antwork-analytics/
-│   ├── antwork-viral/
+│   ├── antwork-viral/        ├── antwork-clip/
 │   └── antwork-audit/        # + agents/: the 5 parallel audit subagents
 ├── claude-ai/build.sh        # builds the claude.ai ZIP from skills/
 ├── clawhub/                  # self-contained OpenClaw skill (ClawHub listing coming soon)
