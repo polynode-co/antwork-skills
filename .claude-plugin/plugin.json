@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "antwork",
   "displayName": "Antwork",
-  "description": "Plan, draft, schedule and publish across 12 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord and Telegram. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, campaigns, post ideas, brand voice, analytics and audits, plus 5 audit agents.",
-  "version": "1.6.0",
+  "description": "Plan, draft, schedule and publish across 14 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, campaigns, post ideas, brand voice, analytics and audits, plus 5 audit agents.",
+  "version": "1.6.1",
   "author": {
     "name": "Iker Gonzalez",
     "url": "https://github.com/iker-gonzalez"
