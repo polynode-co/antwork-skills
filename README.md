@@ -12,7 +12,7 @@ Pick your agent. Each line adds the Antwork skills (including [`/antwork ship`](
 
 | Agent | Command |
 |---|---|
-| **Claude Code** (plugin: skills, audit agents and MCP server) | `/plugin marketplace add polynode-co/antwork-skills` then `/plugin install antwork@antwork` |
+| **Claude Code** (plugin: skills, audit agents and MCP server) | `/plugin marketplace add https://github.com/polynode-co/antwork-skills.git` then `/plugin install antwork@antwork` |
 | **Codex** (plugin: skills and MCP server) | `codex plugin marketplace add polynode-co/antwork-skills && codex plugin add antwork@antwork && codex mcp login antwork` |
 | **Any agent, skills only** ([skills CLI](https://skills.sh): Claude Code, Codex, Cursor and others) | `npx skills add polynode-co/antwork-skills` |
 
@@ -125,7 +125,7 @@ Once connected, a good first run is **audit** (where you stand), then **ideas** 
 This repo is also a Claude Code **plugin marketplace**. Installing the plugin wires up the Antwork MCP server *and* all skills + agents in one step:
 
 ```sh
-/plugin marketplace add polynode-co/antwork-skills
+/plugin marketplace add https://github.com/polynode-co/antwork-skills.git
 /plugin install antwork@antwork
 ```
 
@@ -151,17 +151,28 @@ cp -r antwork-skills/clawhub/antwork ~/.openclaw/skills/antwork
 mcporter config add antwork --url https://api.antwork.io/mcp --auth oauth
 ```
 
-It is deliberately not the router above. ClawHub publishes one folder, so a skill that routes to 8 siblings that were never installed would be broken — this one inlines the setup, the drafting protocol, the character limits and the draft→publish two-step in a single file.
+It is deliberately not the router above. ClawHub publishes one folder, so a skill that routes to 10 siblings that were never installed would be broken — this one inlines the setup, the drafting protocol, the character limits and the draft→publish two-step in a single file.
 
 #### claude.ai
 
-Plugins are Claude Code only, so claude.ai gets the same skills as one upload:
+claude.ai and Cowork install plugins from the Claude Directory (**Customize > Plugins**). This plugin is not listed there yet, so until it is, claude.ai gets the same skills as one upload:
 
 1. Download [`antwork-claude-ai-skill.zip`](https://github.com/polynode-co/antwork-skills/releases/download/claude-ai-skill/antwork-claude-ai-skill.zip).
 2. In claude.ai, open Settings, find Skills, and upload the ZIP.
 3. Connect the Antwork connector (see [Connect](#connect)) if you haven't.
 
 It is one skill named `antwork`: the router, with every other skill and audit dimension inside it as a reference file it reads when needed. [`claude-ai/build.sh`](claude-ai/build.sh) generates it from `skills/` (each skill with its templates, and the audit's agents), and a workflow republishes it on every change, so it never drifts from the plugin. Posting itself needs no skill on claude.ai either: the connector sends its drafting rules when it connects.
+
+## What the plugin runs and sends
+
+The plugin is the files in this repo: skills, five audit agents and one MCP server entry. It has no hooks, no scripts that start on their own, no bundled programs and no package installs.
+
+- **One MCP server, `https://api.antwork.io/mcp`** ([`.mcp.json`](.mcp.json)). Claude signs in to it with OAuth; the plugin holds no API key or token. What goes through it is what you ask for: the text, media and times of posts you approve, and reads of your workspaces, connected accounts, posts and their metrics. Each request also carries the header `X-Antwork-Install: antwork-skills`, which tells Antwork the connection came from this plugin rather than one added by hand. Antwork records it as the install source in its own product analytics and uses it for nothing else. What Antwork stores, and for how long, is in its [privacy policy](https://antwork.io/privacy).
+- **Commands a skill asks Claude to run.** They show in your session and follow your permission settings, like any other command:
+  - `/antwork ship` reads the current repo: `git log`, `git describe`, `git diff --stat`, and `gh pr list` / `gh release view` when `gh` is installed. It writes nothing to the repo.
+  - `/antwork clip` cuts and captions the video on your machine with `ffmpeg` and `ffprobe`, and transcribes it with a local speech-to-text model (whisper.cpp, faster-whisper or openai-whisper) if one is installed. It offers to install a missing tool and installs nothing unless you agree; a transcriber's first run downloads its model weights, and the skill asks before a large download. Given a link instead of a file, it downloads that video with `yt-dlp` if you have it. The full video stays on your machine, with no cloud transcription; only the clips you approve are uploaded, to Antwork.
+  - Attaching a local file to a post (clips, screenshots) is one `curl -X PUT` of that file to the one-time upload address that the `add_media` tool returns, on `api.antwork.io`.
+- **Nothing else.** The skills send no data to any other service.
 
 ## Repository layout
 
@@ -184,6 +195,9 @@ antwork-skills/
 ├── claude-ai/build.sh        # builds the claude.ai ZIP from skills/
 ├── clawhub/                  # self-contained OpenClaw skill (ClawHub listing coming soon)
 ├── install.sh / uninstall.sh # script-install fallback
+├── llms-install.md           # how an agent (Cline) adds the server
+├── docs/                     # directory submission answers
+├── assets/                   # icons
 └── README.md / LICENSE
 ```
 
