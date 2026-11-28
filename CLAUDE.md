@@ -4,8 +4,9 @@ A skill library that routes `/antwork <command>` to specialized skills, each enc
 correct sequence of Antwork MCP tool calls. Distributed as a Claude plugin (`plugin/`, bundled
 `.mcp.json` → `api.antwork.io/mcp`), listed in the Claude Directory from that folder, or via `install.sh`.
 
-This repo is **prompt content, not code**. There are no dependencies and no test
-suite (the only build copies files, below) — correctness means the instructions are accurate about Antwork's MCP tools.
+This repo is **prompt content, not code**. There are no dependencies and no test suite; the
+only builds copy or generate files from `skills/` (`build-plugin.sh`, the claude.ai ZIP and the
+Perplexity plugin, below). Correctness means the instructions are accurate about Antwork's MCP tools.
 
 ## Layout
 
@@ -29,6 +30,14 @@ suite (the only build copies files, below) — correctness means the instruction
   agent becomes a file under `references/`). `.github/workflows/claude-ai-skill.yml` reruns it on
   every push to `main` that touches `skills/` or `claude-ai/` and replaces the asset on the
   `claude-ai-skill` release, whose URL antwork.io links to. Never rename that release or asset.
+- `perplexity/build.sh` — generates `perplexity/antwork/`, the Perplexity plugin (`plugin.json`,
+  an `mcp.json` with `"type": "http"` and no headers, and a copy of `skills/`). The folder is
+  committed, because Perplexity's Import plugin from GitHub takes its URL. **Any change to
+  `skills/` or `plugin/.claude-plugin/plugin.json` reruns it and commits the result**, or
+  `.github/workflows/perplexity-plugin.yml` fails the PR. On `main` that workflow replaces the
+  ZIP on the `perplexity-plugin` release, which antwork.io serves at
+  `/downloads/antwork-perplexity-plugin.zip`. Never rename that release or asset, and never edit
+  `perplexity/antwork/` by hand.
 - `README.md` — the command table. **It must stay in sync with `skills/`.**
 
 ## Changing a skill
@@ -36,8 +45,9 @@ suite (the only build copies files, below) — correctness means the instruction
 Applies to every change, by hand or unattended.
 
 - **Base branch is `main`** — this repo has no `dev` branch. Branch from `main`, PR to `main`.
-- Nothing to test; the one build is `./build-plugin.sh` (see Layout). Verification is by inspection; say so in the PR body rather
-  than implying automated coverage.
+- Nothing to test; the builds are `./build-plugin.sh` and `perplexity/build.sh` (see Layout): run both
+  and commit `plugin/` and `perplexity/antwork/` (CI checks each). Otherwise verification is by
+  inspection; say so in the PR body rather than implying automated coverage.
 - Raise `version` in `plugin/.claude-plugin/plugin.json` (and the two `.cursor-plugin/` manifests) with every
   change to the plugin: the Directory and existing installs only pick up a new version.
 - **Never invent MCP tool names, parameters, or response shapes.** Every tool referenced in

@@ -1,0 +1,53 @@
+---
+name: antwork
+description: Router for the Antwork social-media toolkit. Use when the user wants a multi-step Antwork workflow through its MCP connector — posting about what they shipped from a git repo, cutting one long video into captioned vertical Shorts, a content calendar, repurposing one piece across platforms, a campaign or launch week, data-driven post ideas, studying viral posts in a niche or from a creator, reading an account's voice, an analytics report, or a full social-presence audit. Routes "/antwork <command>" to the right skill. Trigger on "/antwork", "use Antwork to…", or any request to plan, analyze or audit social posting through Antwork.
+---
+
+# Antwork — social-media command center
+
+Antwork is an MCP-native social-media scheduler. Its MCP server already tells you how to do the single steps: draft a post, schedule or publish it, attach media, connect an account, retry a failed post. Those need no skill — follow the server's instructions and each tool's description.
+
+These skills cover the **multi-step workflows** the server can't spell out on its own: plans that need approval before any draft, batches that must avoid the existing calendar, reports that turn rows into decisions. This skill is the router.
+
+## Commands
+
+| Command | Skill | What it does |
+|---|---|---|
+| `/antwork calendar <theme>` | `antwork-calendar` | Plan and batch-schedule a content calendar across the week/month. |
+| `/antwork repurpose <source>` | `antwork-repurpose` | Turn one piece (blog, transcript, long post) into platform-native variants. |
+| `/antwork clip <video>` | `antwork-clip` | Cut one long video into captioned vertical clips on the user's machine, then draft each for YouTube Shorts, TikTok, Instagram Reels and Facebook. |
+| `/antwork campaign <goal>` | `antwork-campaign` | Sequence a multi-post campaign / launch week toward a goal. |
+| `/antwork ideas [topic]` | `antwork-ideas` | Generate data-driven hooks grounded in what already performed. |
+| `/antwork viral <niche or @creator>` | `antwork-viral` | Study posts that went viral in a niche or for a creator, name the patterns, and write variations in the user's voice. |
+| `/antwork voice [account]` | `antwork-voice` | Read an account's voice from its real posts, or capture one from samples for an account with no history. |
+| `/antwork analytics [range]` | `antwork-analytics` | Pull performance + engagement and synthesize a report. |
+| `/antwork audit` | `antwork-audit` | Full social-presence audit across 5 dimensions + a 0-100 Social Health Score. |
+| `/antwork ship [--since …] [--release <tag>]` | `antwork-ship` | Turn the current repo's recent commits, merged PRs or a release into build-in-public posts. |
+
+Where these skills aren't installed one by one (the claude.ai package), each one's instructions are in `references/<skill-name>.md` next to this file: read that file and follow it as the skill.
+
+If the user just describes intent ("plan next week", "how did last month do?"), route to the matching skill — they don't have to type the command.
+
+## Handled directly, without a skill
+
+- **One post** ("post this to LinkedIn", "schedule a tweet for Tuesday"): `get_post_context` for the account, then `create_post`, then `schedule_post` or `publish_post`. One idea on several accounts: `create_post(posts=[{account_id, text}, ...])`, one entry per account, then `schedule_post(post_ids=[...])` or `publish_post(post_ids=[...])` with the `postIds` it returns.
+- **Setup and connections** ("connect my X", "my account is disconnected"): `get_connection_urls`. Timezone, posting times and brand identity: `update_workspace`.
+- **Media**: one tool, `add_media`, with `attach_to_post_ids` for every target post: `file` for a file attached in ChatGPT, `url` for a public link, `media_urls` / `media_ids` for library items, or `upload={}` when you can run code with the file (then one `curl -X PUT --data-binary` to the returned `uploadUrl`). `attach_media` only sets a post's exact list (reorder, remove, clear). Otherwise give the user the post's `mediaUrl`, which opens it in the Antwork composer with the media picker open. Post results also carry `editUrl` (the post in the composer) and `settingsUrl` (its platform settings, e.g. the TikTok audience, which only the user can choose).
+- **Engagement**: `publish_post(post_id)` on a failed post retries it once the failure's cause is fixed, `fetch_platform_posts` for what is live.
+
+## Routing logic
+
+1. **Resolve the verb.** Map the request to one command above, or to a direct step. When ambiguous, prefer the narrowest: a single post is a direct step, not `antwork-campaign`.
+2. **Check prerequisites once.** Every workflow needs a workspace and a connected account. `list_social_accounts` lists the connected accounts (call it again only when a result's `connectionsModifiedAt` has moved); if none are connected, call `get_connection_urls` first.
+3. **Hand off — don't reimplement.** Each skill owns its tool sequence. Pass along the user's intent and what you already know (workspace, accounts).
+
+## Ground truth every workflow must respect
+
+- **Draft → publish/schedule is two steps.** `create_post` creates **drafts**. Nothing is scheduled until `schedule_post` succeeds, and nothing is live until `publish_post` does. Both take one `post_id` or several `post_ids` (at most 10 posts per call).
+- **Ask the next step once.** After a draft the server has you offer publish now, schedule, or keep as a draft, and the user's pick is the approval. In a workflow with an approved plan that already set the times (calendar, campaign), that approval covers scheduling: don't stop to re-ask per draft. For a batch without times, ask once for the whole set, not per post.
+- **One account per post, its own copy per account.** Several accounts means `create_post(posts=[...])` with one entry per account, each written for that account; the drafts are one post with a version per account. Never one body across many accounts.
+- **Voice comes from the account's own posts.** `get_post_context` returns them; there is no stored voice profile. Call it before writing copy for any account. Its `performance` block, when present, ranks the account's Antwork-published posts by the metric that matters on that platform (`rankedBy`, `topPosts`): weight topics and hooks by what performed.
+- **Hashtags live in the text.** Hashtags go in one place: write them in `text`, or pass them in `hashtags` (no `#`) and the server appends them to the text, where they count toward the character limit. Never both. On YouTube `hashtags` are video tags instead.
+- **Hard limits.** Character limits are per platform (X 280 · Threads 500 · Pinterest 800 · Instagram 2,200 · TikTok 2,200 · LinkedIn 3,000 · YouTube 5,000 · Facebook 63,206). TikTok and YouTube need a video; Instagram and Pinterest need an image or video. Scheduling reaches at most 30 days ahead. Each account has a daily cap per rolling 24 hours (`get_post_context` returns it as `dailyPostCap`; past it, `daily_cap_reached`) and at most 100 scheduled posts waiting on the free plan, 1,000 paid (`schedule_queue_full`). On X and Threads, a repeat of a recent post (`duplicate_post`) or a post within 30 minutes of another on the same account (`posting_too_close`) is refused: spread a batch out instead of retrying.
+- **Plan before batches.** Anything bigger than one post gets a numbered plan the user approves before the first draft.
+- **Confirm destructive ops.** `delete_post` and `delete_media` need the user's go-ahead first. Disconnecting a social account is web-only (the Antwork web app).

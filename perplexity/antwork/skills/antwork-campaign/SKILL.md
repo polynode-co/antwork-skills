@@ -1,0 +1,62 @@
+---
+name: antwork-campaign
+description: Use when the user wants to run a multi-post campaign or launch week through Antwork — a sequence of posts spread over days that build toward a goal (product launch, event, sale, announcement, content series). Trigger on phrases like "plan a launch week", "build a campaign", "tease and launch a product", "a series of posts leading up to X", "drip a campaign over the next two weeks", or any request to coordinate several posts toward one outcome.
+---
+
+# Running a campaign with Antwork
+
+A campaign is a sequence of posts (beats) scheduled across days toward a single goal. Each beat is its own post, with a version per account that carries it; the beats are tied together by the plan and a per-post `goal`, not by a shared id. The work is to design the arc first, get approval, then create and schedule the sequence. This workflow codifies the mistakes assistants make when coordinating multi-post pushes.
+
+## 1. Define the campaign before drafting
+
+Pin down the brief before any copy. Capture it in `templates/campaign-brief.md`:
+
+- **Goal** — what the campaign should achieve (signups, attendance, sales, awareness) and the single success metric.
+- **Window & cadence** — start/end dates and how many posts on which days.
+- **Audience & key message** — the through-line every post reinforces.
+- **Platforms/accounts** — which `account_id`s (check `list_social_accounts`; skip unhealthy tokens).
+
+For launch-shaped campaigns, use `templates/launch-week.md` for the classic arc: pre-launch teasers → launch-day push → follow-up / social proof.
+
+## 2. Pull context and design the arc
+
+- `list_posts(date_from, date_to, group_by_day=true)` — so the campaign weaves around existing posts, not on top of them.
+- `get_post_context(account_ids=[...])` — brand, default posting times and timezone, plus each account's recent posts, which are its voice. One call for every account in the campaign.
+
+Design the sequence so each post has a distinct job (tease → reveal → proof → last call), not five rewordings of the same announcement.
+
+## 3. Present the sequence as a plan — and wait
+
+Present the full sequence as a **numbered plan** and stop for explicit approval before creating anything. One row per post:
+
+`# | date · time (tz) | account / platform | role in arc | hook | goal`
+
+Editing a 7-post plan is far cheaper than editing 7 drafts. Don't call `create_post` during planning.
+
+## 4. Create the sequence as one campaign
+
+One call per beat:
+
+- A beat on several accounts: `create_post(posts=[{account_id, text, goal: "<per-post goal>"}, ...])`, one entry per account that carries it. Those drafts are one post with a version per account.
+- A beat on one account: `create_post(text, account_id, goal=...)`.
+
+Don't pass one `campaign_id` across beats: it would make every beat a version of the same post, and the web app would show the whole week as one post. Never send identical text in every entry: each account gets copy written for it. Hashtags go in one place: write them in `text`, or pass them in `hashtags` (no `#`) and the server appends them to the text, where they count toward the character limit. Never both. On YouTube `hashtags` are video tags instead. Set a meaningful per-post `goal` (e.g. "tease", "launch", "social-proof", "last-call") — it makes later performance analysis legible. Everything is still a DRAFT at this point.
+
+Respect hard char limits per platform (X 280, Threads 500, Pinterest 800, IG 2200, LinkedIn 3000, TikTok 2200, YouTube 5000, FB 63206) — scheduling rejects anything over.
+
+## 5. Schedule across the window
+
+The approved plan is the go-ahead to schedule its beats, so don't stop after each draft to ask publish / schedule / keep as draft; ask again only for a beat that changed from the plan. Schedule each draft to its slot: `schedule_post(post_id, scheduled_for)` with ISO 8601 timestamps drawn from the workspace's preferred times, spread across the campaign days. For a beat that goes out on several accounts at the same moment, `schedule_post(scheduled_for, post_ids=[...])` does them in one call (at most 10 posts per call; a larger set is refused with `too_many_posts`, so pass the beat's `post_ids` rather than a long campaign's `campaign_id`). Scheduling reaches at most 30 days ahead; a longer arc keeps its later beats as drafts until they come into range. A draft isn't on the calendar until `schedule_post` succeeds. If a call is blocked (over limit, or `needs_reconnect` with a `reauthUrl`), name the specific post and reason.
+
+For a hard launch moment you want live to the second, publish at the moment instead of pre-scheduling: `publish_post(post_id)` for one account, `publish_post(post_ids=[...])` for several. Both return live URLs; report them.
+
+## 6. Track the campaign as it runs
+
+- `list_posts(status="scheduled")` and `list_posts(group_by_day=true)` — confirm the full arc is queued and see it laid out.
+- `list_posts(date_from, date_to)` over the campaign's days pulls its posts (read each one's `goal` to tell the beats apart); `list_posts(query=...)` finds posts by keyword.
+- After posts go live, hand off to the `antwork-analytics` skill — filter on the campaign's posts (its days and per-post `goal`) to measure against the success metric.
+- Any post that failed to publish: `publish_post(post_id)` retries it.
+
+## 7. Cleanup
+
+If the user cuts a post from the campaign, `update_post(post_id, status="draft")` to pull it off the calendar, or `delete_post` to remove it — confirm first, since deleting a scheduled draft is a hard delete. Published posts soft-delete by default and preserve analytics.

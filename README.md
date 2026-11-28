@@ -163,6 +163,18 @@ claude.ai and Cowork install plugins from the Claude Directory (**Customize > Pl
 
 It is one skill named `antwork`: the router, with every other skill and audit dimension inside it as a reference file it reads when needed. [`claude-ai/build.sh`](claude-ai/build.sh) generates it from `skills/` (each skill with its templates, and the audit's agents), and a workflow republishes it on every change, so it never drifts from the plugin. Posting itself needs no skill on claude.ai either: the connector sends its drafting rules when it connects.
 
+#### Perplexity
+
+[`perplexity/antwork/`](perplexity/antwork) is the plugin for Perplexity: every skill above plus the Antwork connector. Plugins with skills need a Perplexity plan that includes Computer.
+
+1. Download [`antwork-perplexity-plugin.zip`](https://antwork.io/downloads/antwork-perplexity-plugin.zip).
+2. In Perplexity, open Plugins, then Add custom, then Upload plugin or skill. Drop the ZIP and Submit.
+3. Open the Antwork plugin, click Connect, and sign in to Antwork.
+
+Or choose Import plugin from GitHub and paste `https://github.com/polynode-co/antwork-skills/tree/main/perplexity/antwork`. Full steps: [antwork.io/automate/perplexity](https://antwork.io/automate/perplexity).
+
+It has its own `mcp.json` because Perplexity skips a server with fixed headers or no `type`, and both of this repo's root configs have one of those. [`perplexity/build.sh`](perplexity/build.sh) generates the folder from `skills/` and `plugin/.claude-plugin/plugin.json`; a workflow fails any PR that leaves it stale and republishes the ZIP on every change to `main`.
+
 ## What the plugin runs and sends
 
 The plugin is the [`plugin/`](plugin) folder: the skills, five audit agents and one MCP server entry. It has no hooks, no scripts that start on their own, no bundled programs and no package installs. Its [README](plugin/README.md) lists everything it runs and sends: the one server (`https://api.antwork.io/mcp`, with an `X-Antwork-Install` header naming this plugin), the read-only git commands in `/antwork ship`, the local ffmpeg and transcriber steps in `/antwork clip`, and uploads to `api.antwork.io` only.
@@ -188,6 +200,7 @@ antwork-skills/
 ├── .mcp.json                 # Antwork MCP server (copied into plugin/)
 ├── .cursor-plugin/ + mcp.json  # Cursor plugin: the server plus skills/
 ├── claude-ai/build.sh        # builds the claude.ai ZIP from skills/
+├── perplexity/               # build.sh + antwork/, the generated Perplexity plugin
 ├── clawhub/                  # self-contained OpenClaw skill (ClawHub listing coming soon)
 ├── install.sh / uninstall.sh # script-install fallback
 ├── llms-install.md           # how an agent (Cline) adds the server
@@ -198,7 +211,7 @@ antwork-skills/
 
 ## Contributing
 
-Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields. After changing `skills/`, run `./build-plugin.sh` and commit `plugin/` too; CI fails while it is stale.
+Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields. After changing `skills/`, run `./build-plugin.sh` and `perplexity/build.sh` and commit `plugin/` and `perplexity/antwork/` too; CI fails while either is stale.
 
 ## License
 
