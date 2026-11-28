@@ -2,9 +2,9 @@
 
 [![skills.sh](https://skills.sh/b/polynode-co/antwork-skills)](https://skills.sh/polynode-co/antwork-skills)
 
-**AI assistants have no built-in connector for posting to social media.** To let your assistant draft, schedule and publish posts, you connect it to an MCP server that holds the platform permissions. [Antwork](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) is that server: connect `https://api.antwork.io/mcp` once, sign in with OAuth, and your assistant can post to your connected accounts on **LinkedIn (personal profile or company page), X, Instagram, Facebook Pages, Threads, TikTok, YouTube and Pinterest**. Posts stay drafts until you ask it to schedule or publish them.
+**AI assistants have no built-in connector for posting to social media.** To let your assistant draft, schedule and publish posts, you connect it to an MCP server that holds the platform permissions. [Antwork](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) is that server: connect `https://api.antwork.io/mcp` once, sign in with OAuth, and your assistant can post to your connected accounts on **LinkedIn (personal profile or company page), X, Instagram, Facebook Pages, Threads, TikTok, YouTube, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile**. Posts stay drafts until you ask it to schedule or publish them.
 
-It works in VS Code (GitHub Copilot chat), Claude, ChatGPT, Cursor and any other client that speaks MCP. Two social accounts are free, then $5 a month each ([pricing](https://antwork.io/pricing?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills)).
+It works in VS Code (GitHub Copilot chat), Claude, ChatGPT, Cursor, Cline and any other client that speaks MCP. The free plan covers 2 social accounts and 10 posts a month with no card; paid plans start at $19 a month ([pricing](https://antwork.io/pricing?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills)).
 
 ## Install in one line
 
@@ -66,6 +66,7 @@ Install **Antwork** from the MCP servers gallery, or [add it in one click](https
 - **Claude Code:** install the plugin below, which connects the server and adds the skills in one step.
 - **ChatGPT:** [setup guide](https://antwork.io/automate/chatgpt?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills).
 - **Cursor, and Grok Bot through Cursor's catalog:** this repo is also a Cursor plugin (`.cursor-plugin/` and `mcp.json`: the server plus the skills). Until it is listed in the Cursor Marketplace, use the [setup guide](https://antwork.io/automate/cursor?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills), or give Grok Bot the server URL ([guide](https://antwork.io/automate/grok-bot?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills)).
+- **Cline:** open MCP Servers → **Remote Servers**, enter the name `antwork`, the URL `https://api.antwork.io/mcp` and transport **Streamable HTTP**, click **Add Server**, then sign in when your browser opens. Or put this in `cline_mcp_settings.json`: `{"mcpServers": {"antwork": {"type": "streamableHttp", "url": "https://api.antwork.io/mcp"}}}`. Step by step for agents: [llms-install.md](llms-install.md).
 - **Anything else:** point it at the server URL above. [Full MCP docs](https://antwork.io/docs/mcp?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills).
 
 ### What your assistant can do

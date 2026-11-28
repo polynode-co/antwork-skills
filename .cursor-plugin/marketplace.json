@@ -6,13 +6,13 @@
   },
   "metadata": {
     "description": "Antwork for Cursor: the Antwork MCP server and its social-media skills",
-    "version": "1.6.0"
+    "version": "1.6.1"
   },
   "plugins": [
     {
       "name": "antwork",
       "source": "./",
-      "description": "Plan, draft, schedule and publish across 12 social networks from chat through the Antwork MCP server"
+      "description": "Plan, draft, schedule and publish across 14 social networks from chat through the Antwork MCP server"
     }
   ]
 }
