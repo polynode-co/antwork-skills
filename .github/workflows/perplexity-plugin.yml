@@ -1,0 +1,53 @@
+name: Perplexity plugin
+
+# perplexity/antwork/ is generated from skills/ and .claude-plugin/plugin.json
+# by perplexity/build.sh. Every PR and push that touches them fails if the
+# committed folder is stale. On main the upload ZIP is rebuilt and replaces
+# the asset on the `perplexity-plugin` release, which antwork.io serves at
+#   https://antwork.io/downloads/antwork-perplexity-plugin.zip
+# Never rename that release or asset.
+
+on:
+  pull_request:
+    paths:
+      - skills/**
+      - perplexity/**
+      - .claude-plugin/plugin.json
+      - .github/workflows/perplexity-plugin.yml
+  push:
+    branches: [main]
+    paths:
+      - skills/**
+      - perplexity/**
+      - .claude-plugin/plugin.json
+      - .github/workflows/perplexity-plugin.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./perplexity/build.sh --check
+
+  publish:
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./perplexity/build.sh --zip dist/antwork-perplexity-plugin.zip
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view perplexity-plugin >/dev/null 2>&1; then
+            gh release upload perplexity-plugin dist/antwork-perplexity-plugin.zip --clobber
+          else
+            gh release create perplexity-plugin dist/antwork-perplexity-plugin.zip \
+              --title "Antwork plugin for Perplexity" \
+              --notes "In Perplexity, open Plugins, then Add custom, then Upload plugin or skill, and drop this ZIP. Rebuilt from main on every change to the skills." \
+              --latest=false
+          fi

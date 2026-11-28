@@ -1,0 +1,63 @@
+---
+name: antwork-calendar
+description: Use when the user wants to plan and batch-schedule a content calendar through Antwork — filling a week or month with posts across accounts, spacing them at the workspace's preferred times, and avoiding clashes with what's already scheduled. Trigger on phrases like "plan my week/month of content", "build a posting calendar", "schedule a batch of posts", "fill my calendar", "what should I post this week", or any request to lay out and schedule multiple posts at once.
+---
+
+# Planning a content calendar with Antwork
+
+Antwork is an MCP-native social scheduler. A calendar is just a set of drafts each bound to one account and a `scheduled_for` time. The job is to plan the whole grid *first*, get approval, then create and schedule each slot. This workflow codifies the mistakes assistants make when batch-scheduling.
+
+## 1. Read the existing calendar before proposing anything
+
+Never schedule into a vacuum. First call:
+
+- `list_posts(date_from, date_to, group_by_day=true)` — what's already scheduled or published in the target window. Plan *around* it; don't double-book a slot or repeat a topic that just went out.
+- `get_post_context` — its `workspace` block holds the configured posting times (`preferredTimes`) and `timezone`. These times are your default slots.
+- `list_social_accounts` — the accounts you can target (with `account_id`, platform, handle, token health). Skip accounts whose `tokenHealthStatus` isn't `healthy` — flag them for reconnect instead of scheduling onto a dead token.
+
+If multiple workspaces exist and none is default, resolve with `set_default_workspace` before anything else.
+
+## 2. Present the calendar as a plan — and wait
+
+Editing a plan is cheaper than editing fifteen drafts. Present the calendar as a **numbered table** and stop for explicit approval before creating a single post. One row per slot:
+
+`# | date · time (tz) | account / platform | hook | goal`
+
+Use `templates/content-calendar.md` as the skeleton. Space slots across the workspace's preferred posting times — don't stack three posts at 09:00. Respect per-platform cadence norms (X tolerates several a day; LinkedIn one a day is plenty). Vary topics and formats across the week so the feed doesn't read as repetitive.
+
+Do **not** call `create_post` during planning.
+
+## 3. Draft in the account's voice, per slot
+
+Once approved, work slot by slot. For each row, before writing copy:
+
+- `get_post_context(platform, account_id)` — brand plus the account's last 15 posts with their engagement. Those posts are the voice: match them, weighting the ones that performed (its `performance.topPosts`, when present, ranks them by the platform's own metric), and don't impose a house style. With several accounts, `get_post_context(account_ids=[...])` loads them all in one call. If an account has no post history, ask the user for 3–5 sample posts before drafting a whole week for it.
+
+A slot for one account is one `create_post`. A slot where the same idea runs on several accounts is one `create_post(posts=[...])`, with one entry per account and each entry's copy written for that account. Never send identical text in every entry. Different ideas go in different calls: entries that repeat an account are saved as separate posts, not versions of one.
+
+Respect the hard character limit for each platform (X 280, Threads 500, Pinterest 800, Instagram 2200, LinkedIn 3000, TikTok 2200, YouTube 5000, Facebook 63206). `schedule_post` refuses anything over the limit, so trim before you schedule.
+
+## 4. Create, then schedule — the two-step
+
+`create_post` produces a **DRAFT**. It does not put the post on the calendar. For each slot:
+
+1. `create_post(text, account_id, hashtags?, goal?)` → returns `post_id`. For a multi-account slot, `create_post(posts=[...])` → returns `postIds`, one post per account. Hashtags go in one place: write them in `text`, or pass them in `hashtags` (no `#`) and the server appends them to the text, where they count toward the character limit. Never both. On YouTube `hashtags` are video tags instead.
+2. `schedule_post(post_id, scheduled_for)` with an ISO 8601 timestamp at the planned slot, or `schedule_post(scheduled_for, post_ids=[...])` to schedule every post of a multi-account slot at once.
+
+**Scheduling reaches at most 30 days ahead.** A "plan my month" can be planned in full, but slots past day 30 stay drafts: say which ones, and schedule them later.
+
+The approved calendar is the user's go-ahead to schedule its slots, so don't stop after each draft to ask publish / schedule / keep as draft. Only ask again if a slot changed from the plan.
+
+Only after `schedule_post` succeeds is the post actually on the calendar. Telling the user "your week is scheduled" after only `create_post` is false.
+
+`schedule_post` runs an account health check and a character-limit check. If it blocks, name the specific slot and reason (over limit, or `needs_reconnect` with the `reauthUrl`) rather than saying "scheduling failed."
+
+## 5. Confirm with the calendar view
+
+After scheduling the batch, call `list_posts(date_from, date_to, group_by_day=true)` again for the window and report back the filled grid — date, time, account, hook — so the user sees the whole week at a glance. Note any slots that were skipped and why (dead token, over limit) instead of silently dropping them.
+
+## 6. Edits and reschedules
+
+- Move a slot: `update_post(post_id, scheduled_for=...)` — it reschedules only when the time actually changes.
+- Reuse a strong post on another account: `get_post(post_id)` for the copy, then `create_post` on the other account with text rewritten in that account's voice, then `schedule_post`. To make it another version of the original, pass the original's `campaignId` as `campaign_id`.
+- Pull a slot: `update_post(post_id, status="draft")` to take it off the calendar without deleting, or `delete_post` to remove it (confirm first — deleting a scheduled draft is a hard delete).
