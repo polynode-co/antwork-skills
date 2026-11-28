@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "antwork": {
+      "type": "http",
+      "url": "https://api.antwork.io/mcp",
+      "headers": {
+        "X-Antwork-Install": "antwork-skills"
+      }
+    }
+  }
+}

@@ -31,7 +31,7 @@ DIMENSION: Cadence & Timing
 SCORE: <0-100>
 FREQUENCY: <posts/week per platform>
 LONGEST GAP: <days, dates>
-WINDOW HIT-RATE: <% of posts in preferred windows>
+WINDOW HIT-RATE: <percent of posts in preferred windows>
 QUEUE HEALTH: <how many days of scheduled posts remain>
 TOP 3 FIXES: <impact-ranked; e.g. "fill next week's empty slots via antwork-calendar">
 ```

@@ -27,37 +27,54 @@ Iker submits it from his Claude account. Nothing here is submitted.
 | Field | Value |
 |---|---|
 | Repository | `polynode-co/antwork-skills` |
-| Plugin path | leave empty (the plugin is at the repository root) |
+| Plugin path | `plugin` |
 | Branch or tag | leave empty (follows `main`) |
 
-Then **Validate**. Locally, `claude plugin validate . --profile directory` finds nothing to report. The
-portal also checks things the local command can't, such as whether the name is free, so it can still
-report something new. If it says **Name is taken** or **Name matches a known brand**, stop and tell me.
+Then **Validate**. The plugin is the `plugin/` folder, so the portal reads and scans only that folder.
+It holds just what the plugin loads: the skills and agents, the MCP server entry, its own README, the
+license and the listing icon. The repo's other files (`CLAUDE.md`, the install scripts, the Cursor and
+OpenClaw copies, these docs) sit outside it, because the portal refuses them in a plugin folder for an
+organization that isn't Verified.
 
-The repo also holds `.claude-plugin/marketplace.json`, the self-hosted marketplace behind
-`/plugin marketplace add https://github.com/polynode-co/antwork-skills.git`. The portal treats this folder as the one plugin, so
-the marketplace file does no harm.
+The first portal run (2026-11-28, `main` @ 4a497df, plugin at the root) reported 1 blocking finding,
+4 that would be refused and 9 warnings. The move to `plugin/` and the fixes in the next commit address
+all of them except the name finding below:
+
+- **NAME_CONFUSABLE** ("antwork" is close to the connectors "agentwork" and "atwork"): keep the name and
+  appeal (Iker, 2026-11-28). Appeal text to paste:
+
+  > Antwork is our product's name: an AI social media manager, live at https://antwork.io,
+  > published by Polynode Technologies, S.L. This plugin bundles the same publisher's Antwork MCP connector
+  > (https://api.antwork.io/mcp), which is already submitted to the Directory, with the skills that use it.
+  > It has no connection to Agentwork or Atwork, and its name, icon and descriptions all say Antwork.
+
+- **Unknown keys in plugin.json** (`icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`,
+  `termsOfServiceUrl`): warnings only. They are the Directory's own listing fields, so they stay.
+
+The repo root also holds `.claude-plugin/marketplace.json`, the self-hosted marketplace behind
+`/plugin marketplace add https://github.com/polynode-co/antwork-skills.git`. It lists `./plugin`, so
+Claude Code users install the same folder the Directory lists.
 
 ## 3. Listing details
 
-There is nothing to type here: the portal reads the listing from `.claude-plugin/plugin.json` and the
-README. To change something, edit those files, push and validate again. This is what it will show:
+There is nothing to type here: the portal reads the listing from `plugin/.claude-plugin/plugin.json` and
+`plugin/README.md`. To change something, edit those files, push and validate again. This is what it will show:
 
 | Field | Value (from `plugin.json`) |
 |---|---|
 | Name | `antwork` |
 | Display name | Antwork |
 | Description | Plan, draft, schedule and publish across 14 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, cutting a long video into captioned Shorts, campaigns, post ideas, variations on what went viral, build-in-public posts from your commits, brand voice, analytics and audits, plus 5 audit agents. |
-| Version | 1.6.2 |
+| Version | 1.7.0 |
 | Author | Polynode Technologies, S.L. (https://polynode.co) |
-| Icon | `.claude-plugin/icon.png` (512×512 PNG), the file the Directory takes the listing icon from on the first submission; `plugin.json`'s `icon` points at the same image in `./assets/icon.png` |
+| Icon | the 512×512 Antwork logo, in the plugin's `.claude-plugin` folder, where the Directory takes the listing icon from on the first submission |
 | Homepage | https://antwork.io |
 | Documentation | https://antwork.io/docs/skills |
 | Support | https://antwork.io/contact |
 | Privacy policy | https://antwork.io/privacy |
 | Terms of service | https://antwork.io/terms |
 | License | MIT (`LICENSE` and `"license": "MIT"`) |
-| Long description | `README.md` |
+| Long description | the plugin's own README (`plugin/README.md`), not the repo README |
 
 The author is the company, Polynode Technologies, S.L., as on the Meerko bundle (Iker's call,
 2026-11-28).
@@ -120,6 +137,5 @@ docs. The listing comes from `plugin.json` and the README. If the live form does
   OAuth clients compare the server URL to the protected-resource metadata (`resource:
   https://api.antwork.io/mcp`), so a query string breaks sign-in and the URL would no longer match the
   connector.
-- **The root `CLAUDE.md`.** These are contributor instructions for this repo, and they ship in the plugin
-  folder. `claude plugin validate` warns that Claude Code won't load them as plugin context. That is
-  harmless, and the directory checks don't flag it.
+- **What the local validator misses.** `claude plugin validate --profile directory` passed while the
+  portal found 14 issues; run the portal's **Validate** after any change to `plugin/`.

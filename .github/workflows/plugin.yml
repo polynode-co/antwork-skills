@@ -1,0 +1,17 @@
+name: plugin folder
+
+# plugin/ is what the Claude Directory reads and the marketplace installs. Its
+# skills/, .mcp.json, LICENSE and icon are copies made by build-plugin.sh, so
+# fail any change that edits the sources without refreshing the copies.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./build-plugin.sh --check
