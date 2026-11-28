@@ -12,7 +12,7 @@ Pick your agent. Each line adds the Antwork skills (including [`/antwork ship`](
 
 | Agent | Command |
 |---|---|
-| **Claude Code** (plugin: skills, audit agents and MCP server) | `/plugin marketplace add polynode-co/antwork-skills` then `/plugin install antwork@antwork` |
+| **Claude Code** (plugin: skills, audit agents and MCP server) | `/plugin marketplace add https://github.com/polynode-co/antwork-skills.git` then `/plugin install antwork@antwork` |
 | **Codex** (plugin: skills and MCP server) | `codex plugin marketplace add polynode-co/antwork-skills && codex plugin add antwork@antwork && codex mcp login antwork` |
 | **Any agent, skills only** ([skills CLI](https://skills.sh): Claude Code, Codex, Cursor and others) | `npx skills add polynode-co/antwork-skills` |
 
@@ -125,7 +125,7 @@ Once connected, a good first run is **audit** (where you stand), then **ideas** 
 This repo is also a Claude Code **plugin marketplace**. Installing the plugin wires up the Antwork MCP server *and* all skills + agents in one step:
 
 ```sh
-/plugin marketplace add polynode-co/antwork-skills
+/plugin marketplace add https://github.com/polynode-co/antwork-skills.git
 /plugin install antwork@antwork
 ```
 

@@ -35,7 +35,7 @@ portal also checks things the local command can't, such as whether the name is f
 report something new. If it says **Name is taken** or **Name matches a known brand**, stop and tell me.
 
 The repo also holds `.claude-plugin/marketplace.json`, the self-hosted marketplace behind
-`/plugin marketplace add polynode-co/antwork-skills`. The portal treats this folder as the one plugin, so
+`/plugin marketplace add https://github.com/polynode-co/antwork-skills.git`. The portal treats this folder as the one plugin, so
 the marketplace file does no harm.
 
 ## 3. Listing details
@@ -50,7 +50,7 @@ README. To change something, edit those files, push and validate again. This is 
 | Description | Plan, draft, schedule and publish across 14 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, cutting a long video into captioned Shorts, campaigns, post ideas, variations on what went viral, build-in-public posts from your commits, brand voice, analytics and audits, plus 5 audit agents. |
 | Version | 1.6.2 |
 | Author | Iker Gonzalez |
-| Icon | `./assets/icon.png` (512×512 PNG) |
+| Icon | `.claude-plugin/icon.png` (512×512 PNG), the file the Directory takes the listing icon from on the first submission; `plugin.json`'s `icon` points at the same image in `./assets/icon.png` |
 | Homepage | https://antwork.io |
 | Documentation | https://antwork.io/docs/skills |
 | Support | https://antwork.io/contact |
