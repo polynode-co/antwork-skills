@@ -1,11 +1,11 @@
 # antwork-skills — Claude Code plugin for Antwork
 
 A skill library that routes `/antwork <command>` to specialized skills, each encoding the
-correct sequence of Antwork MCP tool calls. Distributed as a Claude Code plugin (bundled
-`.mcp.json` → `api.antwork.io/mcp`) or via `install.sh`.
+correct sequence of Antwork MCP tool calls. Distributed as a Claude plugin (`plugin/`, bundled
+`.mcp.json` → `api.antwork.io/mcp`), listed in the Claude Directory from that folder, or via `install.sh`.
 
-This repo is **prompt content, not code**. There is no build, no dependencies, and no test
-suite — correctness means the instructions are accurate about Antwork's MCP tools.
+This repo is **prompt content, not code**. There are no dependencies and no test
+suite (the only build copies files, below) — correctness means the instructions are accurate about Antwork's MCP tools.
 
 ## Layout
 
@@ -14,8 +14,16 @@ suite — correctness means the instructions are accurate about Antwork's MCP to
   so the skills CLI, which installs one skill folder at a time, carries them). `campaign-brief.md` lives
   in `antwork-campaign` and `antwork-repurpose` points at it there.
 - `skills/antwork-audit/agents/*.md` — the 5 read-only audit subagents used by `/antwork audit`. The
-  plugin lists them in `.claude-plugin/plugin.json` `agents`, which replaces the default `agents/` scan;
+  plugin lists them in `plugin/.claude-plugin/plugin.json` `agents`, which replaces the default `agents/` scan;
   add or rename an agent there too.
+- `plugin/` — the Claude plugin, the folder the Claude Directory reads (plugin path `plugin`). Its
+  `.claude-plugin/plugin.json` and `README.md` are edited there. Its `skills/`, `.mcp.json`, `LICENSE` and
+  icon are copies made by `./build-plugin.sh`: **after any change to `skills/` or `.mcp.json`, run it and
+  commit `plugin/`**; CI (`build-plugin.sh --check`) fails while it is stale. Never edit `plugin/skills/`.
+  It is a separate folder because the Directory refuses repo files in a plugin (this `CLAUDE.md`, scripts,
+  other clients' manifests), so nothing but what the plugin loads goes in it. Keep image file names and
+  `curl … | sh` out of `plugin/`, and `$`-variables out of its agents, which the Directory scan flags.
+- `.claude-plugin/marketplace.json` — the self-hosted marketplace; it lists `./plugin`.
 - `install.sh` / `uninstall.sh` — non-plugin install path.
 - `claude-ai/build.sh` — builds the claude.ai ZIP (one `antwork` skill; every other skill and
   agent becomes a file under `references/`). `.github/workflows/claude-ai-skill.yml` reruns it on
@@ -28,8 +36,10 @@ suite — correctness means the instructions are accurate about Antwork's MCP to
 Applies to every change, by hand or unattended.
 
 - **Base branch is `main`** — this repo has no `dev` branch. Branch from `main`, PR to `main`.
-- Nothing to build or test. Verification is by inspection; say so in the PR body rather
+- Nothing to test; the one build is `./build-plugin.sh` (see Layout). Verification is by inspection; say so in the PR body rather
   than implying automated coverage.
+- Raise `version` in `plugin/.claude-plugin/plugin.json` (and the two `.cursor-plugin/` manifests) with every
+  change to the plugin: the Directory and existing installs only pick up a new version.
 - **Never invent MCP tool names, parameters, or response shapes.** Every tool referenced in
   a skill must exist in the Antwork MCP server. If the issue requires a tool you cannot
   verify against `../antwork.io/agent-service/app/mcp/server.py`, stop and say so rather than

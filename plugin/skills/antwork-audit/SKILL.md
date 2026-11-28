@@ -1,0 +1,65 @@
+---
+name: antwork-audit
+description: Use when the user wants a full audit, health check, or scorecard of their social-media presence managed through Antwork — engagement performance, voice consistency, posting cadence, content quality, and platform coverage. Trigger on "audit my socials", "how's my LinkedIn/X doing", "social health check", "review my Antwork account", "what should I fix", "grade my content".
+---
+
+# Antwork Social Presence Audit
+
+A comprehensive, data-driven audit of everything the user ships through Antwork. It mirrors a 5-dimension marketing audit: five specialized agents run in parallel, each owning one dimension, then you synthesize a single scored report.
+
+## 1. Establish scope first
+
+Before spawning anything, gather the lay of the land so the agents (and the report) reference real accounts and real numbers:
+
+- `list_workspaces` — confirm the default workspace (the user's plan and quota are in its `account` field). If there is more than one and no default, ask which to audit (or `set_default_workspace`).
+- `list_social_accounts` — the connected platforms, handles, token health, and each account's latest `followers` (count and 30-day change). This is the audit's universe.
+- `get_post_context` — its `workspace` block: brand identity, timezone, preferred posting times.
+
+If no accounts are connected, stop: there's nothing to audit yet. Call `get_connection_urls` so the user can connect one.
+
+## 2. Spawn the five dimension agents in parallel
+
+Launch all five in a single batch so they run concurrently. Each is read-only and returns a structured findings block with a 0–100 sub-score and its top 3 fixes. Pass each the workspace and the account list you gathered.
+
+**No subagents where you are running** (claude.ai, or any host without a subagent tool)? Run the five dimensions yourself, one after another, following each agent's instructions file (`agents/<name>.md` in this skill's folder, `references/agents/<name>.md` in the claude.ai package) and returning its findings block before moving on. The analysis and the scoring are the same; only the parallelism is lost.
+
+| Dimension | Agent | Weight | Primary MCP tools |
+|---|---|---|---|
+| Performance | `antwork-performance` | 30% | `get_performance`, `get_engagement_history`, `get_post_context`, `get_post` |
+| Voice Consistency | `antwork-voice-analyst` | 20% | `get_post_context` (per account), `list_posts` |
+| Cadence & Timing | `antwork-cadence` | 20% | `list_posts`, `get_post_context` |
+| Content Quality | `antwork-content` | 20% | `fetch_platform_posts`, `get_post`, `list_posts` |
+| Platform Coverage & Growth | `antwork-growth` | 10% | `list_social_accounts`, `get_engagement_history` (its `followers` table), `get_post_context` |
+
+Where subagents exist, don't analyze the dimensions inline: the parallel agents are the point. If one agent fails or returns nothing, note the gap and score that dimension conservatively rather than blocking the report.
+
+## 3. Compute the composite Social Health Score
+
+Weighted sum of the five sub-scores (0–100):
+
+```
+Score = Performance·0.30 + Voice·0.20 + Cadence·0.20 + Content·0.20 + Growth·0.10
+```
+
+Band it: **80–100 Strong · 60–79 Healthy · 40–59 Needs work · 0–39 At risk.**
+
+## 4. Write the report
+
+Produce a client-ready Markdown report, saved as `ANTWORK-AUDIT.md` where you can write files and in the reply otherwise, with:
+
+- **Header** — workspace name, audited accounts (platform + handle), date, and the composite score with its band.
+- **Executive summary** — 3–5 sentences: the single biggest strength, the single biggest leak, and the one move with the highest payoff.
+- **Scorecard table** — each dimension, its sub-score, and a one-line verdict.
+- **Per-dimension findings** — one section per agent, carrying through its findings and top-3 fixes verbatim-in-spirit (don't dilute the specifics).
+- **Prioritized action plan** — a single merged, impact-ranked checklist drawn from all five agents' fixes. Each item: what to do, which Antwork skill/tool does it (`antwork-voice` to redraft off-voice posts, `antwork-calendar` to fill cadence gaps, etc.), and expected payoff.
+
+## 5. Close with the next move
+
+End by offering to execute the top action immediately through the relevant skill — e.g. "Want me to redraft the off-voice X posts in the account's real voice?" (`antwork-voice`) or "Want me to fill next week's empty slots?" (`antwork-calendar`). The audit is only valuable if it turns into shipped posts.
+
+## Guardrails
+
+- The audit is **read-only**. Never create, edit, schedule, publish, or delete anything during an audit.
+- Metrics refresh every 6 hours on their own; posts published in the last few hours have no numbers yet. Say so instead of scoring them as zero.
+- Quote real numbers from the analytics rows. Never fabricate engagement figures or invent posts that aren't in the data.
+- A blank metric is "not reported", never zero: a null cell in `get_performance` / `get_engagement_history`, or a `get_post` `metricCells` entry whose `state` is not `measured` (`unsupported`, `never_fetched`, `awaiting_permission`, `unreadable`). Don't score a platform down for a metric it cannot report: Instagram and Threads insights may be awaiting Meta's review (`awaitingPermission`), TikTok's analytics scope is in review, X's impressions and link clicks need elevated access, and free-plan X posts are read only at 1, 3 and 7 days. Name these gaps in the report's caveats instead.

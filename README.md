@@ -129,7 +129,7 @@ This repo is also a Claude Code **plugin marketplace**. Installing the plugin wi
 /plugin install antwork@antwork
 ```
 
-That's it — the [`antwork` MCP server](.mcp.json) connects automatically (complete the OAuth prompt), and the router, 10 skills, and 5 audit agents load. Why the plugin over loose skills: the skills are useless until Antwork's MCP is connected, and the plugin ships that config bundled, so there's no separate connector setup.
+That's it — the [`antwork` MCP server](plugin/.mcp.json) connects automatically (complete the OAuth prompt), and the router, 10 skills, and 5 audit agents load. Why the plugin over loose skills: the skills are useless until Antwork's MCP is connected, and the plugin ships that config bundled, so there's no separate connector setup.
 
 #### Script install (no plugin)
 
@@ -165,26 +165,13 @@ It is one skill named `antwork`: the router, with every other skill and audit di
 
 ## What the plugin runs and sends
 
-The plugin is the files in this repo: skills, five audit agents and one MCP server entry. It has no hooks, no scripts that start on their own, no bundled programs and no package installs.
-
-- **One MCP server, `https://api.antwork.io/mcp`** ([`.mcp.json`](.mcp.json)). Claude signs in to it with OAuth; the plugin holds no API key or token. What goes through it is what you ask for: the text, media and times of posts you approve, and reads of your workspaces, connected accounts, posts and their metrics. Each request also carries the header `X-Antwork-Install: antwork-skills`, which tells Antwork the connection came from this plugin rather than one added by hand. Antwork records it as the install source in its own product analytics and uses it for nothing else. What Antwork stores, and for how long, is in its [privacy policy](https://antwork.io/privacy).
-- **Commands a skill asks Claude to run.** They show in your session and follow your permission settings, like any other command:
-  - `/antwork ship` reads the current repo: `git log`, `git describe`, `git diff --stat`, and `gh pr list` / `gh release view` when `gh` is installed. It writes nothing to the repo.
-  - `/antwork clip` cuts and captions the video on your machine with `ffmpeg` and `ffprobe`, and transcribes it with a local speech-to-text model (whisper.cpp, faster-whisper or openai-whisper) if one is installed. It offers to install a missing tool and installs nothing unless you agree; a transcriber's first run downloads its model weights, and the skill asks before a large download. Given a link instead of a file, it downloads that video with `yt-dlp` if you have it. The full video stays on your machine, with no cloud transcription; only the clips you approve are uploaded, to Antwork.
-  - Attaching a local file to a post (clips, screenshots) is one `curl -X PUT` of that file to the one-time upload address that the `add_media` tool returns, on `api.antwork.io`.
-- **Nothing else.** The skills send no data to any other service.
+The plugin is the [`plugin/`](plugin) folder: the skills, five audit agents and one MCP server entry. It has no hooks, no scripts that start on their own, no bundled programs and no package installs. Its [README](plugin/README.md) lists everything it runs and sends: the one server (`https://api.antwork.io/mcp`, with an `X-Antwork-Install` header naming this plugin), the read-only git commands in `/antwork ship`, the local ffmpeg and transcriber steps in `/antwork clip`, and uploads to `api.antwork.io` only.
 
 ## Repository layout
 
 ```
 antwork-skills/
-├── .claude-plugin/
-│   ├── plugin.json           # plugin manifest
-│   └── marketplace.json      # self-hosted marketplace (lists this plugin)
-├── .mcp.json                 # Antwork MCP server — bundled & auto-connected
-├── .cursor-plugin/           # Cursor plugin manifest + single-plugin marketplace
-├── mcp.json                  # the same server, for the Cursor plugin
-├── skills/                   # router + 10 specialized skills, each with its own templates/
+├── skills/                   # router + 10 specialized skills: the one source, each with its own templates/
 │   ├── antwork/              # router — /antwork <command>
 │   ├── antwork-ship/         # commits / PRs / releases → posts
 │   ├── antwork-calendar/     ├── antwork-campaign/
@@ -192,6 +179,14 @@ antwork-skills/
 │   ├── antwork-voice/        ├── antwork-analytics/
 │   ├── antwork-viral/        ├── antwork-clip/
 │   └── antwork-audit/        # + agents/: the 5 parallel audit subagents
+├── plugin/                   # the Claude plugin (Claude Code, the Claude Directory)
+│   ├── .claude-plugin/plugin.json   # plugin manifest (edited here)
+│   ├── README.md             # the plugin's own README, shown in the Directory (edited here)
+│   └── skills/, .mcp.json, LICENSE, icon   # copied by build-plugin.sh; never edit by hand
+├── build-plugin.sh           # refreshes plugin/ from skills/; --check in CI
+├── .claude-plugin/marketplace.json  # self-hosted marketplace: lists ./plugin
+├── .mcp.json                 # Antwork MCP server (copied into plugin/)
+├── .cursor-plugin/ + mcp.json  # Cursor plugin: the server plus skills/
 ├── claude-ai/build.sh        # builds the claude.ai ZIP from skills/
 ├── clawhub/                  # self-contained OpenClaw skill (ClawHub listing coming soon)
 ├── install.sh / uninstall.sh # script-install fallback
@@ -203,7 +198,7 @@ antwork-skills/
 
 ## Contributing
 
-Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields.
+Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields. After changing `skills/`, run `./build-plugin.sh` and commit `plugin/` too; CI fails while it is stale.
 
 ## License
 
