@@ -13,7 +13,7 @@
 # Perplexity's Connect button runs Antwork's OAuth, and its registration name
 # already says which client connected.
 #
-# Generated from skills/ (copied as they are) and .claude-plugin/plugin.json
+# Generated from skills/ (copied as they are) and plugin/.claude-plugin/plugin.json
 # (name, version, description), so the package cannot drift from the Claude
 # Code plugin. Never edit perplexity/antwork/ by hand.
 #
@@ -56,7 +56,7 @@ mkdir -p "$PLUGIN/skills"
 # every plugin manifest carries. Claude Code's `agents` list and `$schema` stay
 # out; the audit's agent files still ride along inside its skill folder.
 jq '{name, displayName, description, version, author, homepage, repository, license}' \
-  "$ROOT/.claude-plugin/plugin.json" > "$PLUGIN/plugin.json"
+  "$ROOT/plugin/.claude-plugin/plugin.json" > "$PLUGIN/plugin.json"
 
 description="$(jq -r .description "$PLUGIN/plugin.json")"
 if [ "${#description}" -gt "$MAX_DESCRIPTION" ]; then

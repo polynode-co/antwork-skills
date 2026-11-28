@@ -173,7 +173,7 @@ It is one skill named `antwork`: the router, with every other skill and audit di
 
 Or choose Import plugin from GitHub and paste `https://github.com/polynode-co/antwork-skills/tree/main/perplexity/antwork`. Full steps: [antwork.io/automate/perplexity](https://antwork.io/automate/perplexity).
 
-It has its own `mcp.json` because Perplexity skips a server with fixed headers or no `type`, and both of this repo's root configs have one of those. [`perplexity/build.sh`](perplexity/build.sh) generates the folder from `skills/` and `.claude-plugin/plugin.json`; a workflow fails any PR that leaves it stale and republishes the ZIP on every change to `main`.
+It has its own `mcp.json` because Perplexity skips a server with fixed headers or no `type`, and both of this repo's root configs have one of those. [`perplexity/build.sh`](perplexity/build.sh) generates the folder from `skills/` and `plugin/.claude-plugin/plugin.json`; a workflow fails any PR that leaves it stale and republishes the ZIP on every change to `main`.
 
 ## What the plugin runs and sends
 
@@ -211,7 +211,7 @@ antwork-skills/
 
 ## Contributing
 
-Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields. After changing `skills/`, run `./build-plugin.sh` and commit `plugin/` too; CI fails while it is stale.
+Each skill lives in `skills/<name>/SKILL.md` with YAML frontmatter (`name`, `description`) followed by markdown instructions. Keep `description:` specific — it determines when Claude auto-loads the skill. Use only [real Antwork MCP tools](https://antwork.io?utm_source=github&utm_medium=readme&utm_campaign=antwork_skills) and never invent tool arguments; the server rejects unknown fields. After changing `skills/`, run `./build-plugin.sh` and `perplexity/build.sh` and commit `plugin/` and `perplexity/antwork/` too; CI fails while either is stale.
 
 ## License
 

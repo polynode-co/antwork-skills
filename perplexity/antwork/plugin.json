@@ -2,7 +2,7 @@
   "name": "antwork",
   "displayName": "Antwork",
   "description": "Plan, draft, schedule and publish across 14 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, cutting a long video into captioned Shorts, campaigns, post ideas, variations on what went viral, build-in-public posts from your commits, brand voice, analytics and audits, plus 5 audit agents.",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "author": {
     "name": "Polynode Technologies, S.L.",
     "url": "https://polynode.co"

@@ -1,6 +1,6 @@
 ---
 name: antwork-viral
-description: Use when the user wants to learn from posts that went viral in their niche or from a creator they admire, and turn the patterns into posts for their own business through Antwork. Trigger on phrases like "what's going viral about X", "find top posts on #hashtag", "study @creator's best posts", "what works in my niche", "make posts like this one but for us", "steal like an artist", or any request to analyze other people's high-performing posts and write variations. Reads the outliers, names the patterns, plans variations in the user's voice, and drafts only after the plan is approved.
+description: 'Use when the user wants to learn from posts that went viral in their niche or from a creator they admire, and turn the patterns into posts for their own business through Antwork. Trigger on phrases like "what''s going viral about X", "find top posts on #hashtag", "study @creator''s best posts", "what works in my niche", "make posts like this one but for us", "steal like an artist", or any request to analyze other people''s high-performing posts and write variations. Reads the outliers, names the patterns, plans variations in the user''s voice, and drafts only after the plan is approved.'
 ---
 
 # Studying viral posts and writing variations in Antwork

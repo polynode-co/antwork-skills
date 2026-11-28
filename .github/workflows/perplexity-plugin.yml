@@ -1,6 +1,6 @@
 name: Perplexity plugin
 
-# perplexity/antwork/ is generated from skills/ and .claude-plugin/plugin.json
+# perplexity/antwork/ is generated from skills/ and plugin/.claude-plugin/plugin.json
 # by perplexity/build.sh. Every PR and push that touches them fails if the
 # committed folder is stale. On main the upload ZIP is rebuilt and replaces
 # the asset on the `perplexity-plugin` release, which antwork.io serves at
@@ -12,14 +12,14 @@ on:
     paths:
       - skills/**
       - perplexity/**
-      - .claude-plugin/plugin.json
+      - plugin/.claude-plugin/plugin.json
       - .github/workflows/perplexity-plugin.yml
   push:
     branches: [main]
     paths:
       - skills/**
       - perplexity/**
-      - .claude-plugin/plugin.json
+      - plugin/.claude-plugin/plugin.json
       - .github/workflows/perplexity-plugin.yml
   workflow_dispatch:
 
