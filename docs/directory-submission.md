@@ -49,7 +49,7 @@ README. To change something, edit those files, push and validate again. This is 
 | Display name | Antwork |
 | Description | Plan, draft, schedule and publish across 14 networks from chat: Instagram, TikTok, LinkedIn, YouTube, X, Facebook, Threads, Pinterest, Bluesky, Mastodon, Discord, Telegram, Slack and Google Business Profile. Free plan, OAuth sign-in, no API key. Adds skills for content calendars, repurposing one piece across platforms, cutting a long video into captioned Shorts, campaigns, post ideas, variations on what went viral, build-in-public posts from your commits, brand voice, analytics and audits, plus 5 audit agents. |
 | Version | 1.6.2 |
-| Author | Iker Gonzalez |
+| Author | Polynode Technologies, S.L. (https://polynode.co) |
 | Icon | `.claude-plugin/icon.png` (512×512 PNG), the file the Directory takes the listing icon from on the first submission; `plugin.json`'s `icon` points at the same image in `./assets/icon.png` |
 | Homepage | https://antwork.io |
 | Documentation | https://antwork.io/docs/skills |
@@ -59,9 +59,8 @@ README. To change something, edit those files, push and validate again. This is 
 | License | MIT (`LICENSE` and `"license": "MIT"`) |
 | Long description | `README.md` |
 
-**Your call before you submit:** the author is you by name. The Meerko bundle uses the company,
-Polynode Technologies, S.L. If the Antwork connector was submitted under the company, use the company
-here too. It is one line in `plugin.json` (`author.name`); tell me and I change it.
+The author is the company, Polynode Technologies, S.L., as on the Meerko bundle (Iker's call,
+2026-11-28).
 
 ## 4. Data handling
 
